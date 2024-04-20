@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "amqplib": "^0.10.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "scripts": {
+    "dev": "nodemon ./*"
   }
 }
