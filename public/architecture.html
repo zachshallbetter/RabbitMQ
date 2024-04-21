@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-commerce Architecture Visualization</title>
+    <link rel="stylesheet" href="./main.css" type="text/css">
+    <script>
+        const title = "E-commerce Platform Architecture - Enhanced Version";
+
+        const groups = {
+            Authentication: { nodes: ['User Authentication', 'Token Validation'], icon: ['aws-cognito', 'aws-lambda'] },
+            Database: { nodes: ['PostgreSQL', 'Real time Subscriptions'], icon: ['aws-rds', 'aws-dynamodb'] },
+            ServerlessFunctions: { nodes: ['Payment Processing', 'Order Status'], icon: ['aws-lambda', 'aws-lambda'] },
+            AIandMachineLearning: { nodes: ['Personalized Recommendations', 'Fraud Detection'], icon: ['aws-sagemaker', 'aws-sagemaker'] },
+            EdgeFunctions: { nodes: ['Stripe Connect', 'Shipengine', 'Data Sanitization', 'Webhook Handling'], icon: ['stripe', 'shipengine', 'aws-lambda', 'aws-lambda'] },
+            Hosting: { nodes: ['Vercel CDN', 'Static Content', 'Dynamic Content'], icon: ['globe', 'aws-s3', 'aws-lambda'] },
+            Interface: { nodes: ['Next js', 'Websockets', 'State Management'], icon: ['nextdotjs', 'websocket', 'react'] },
+            Security: { nodes: ['HTTPS', 'Secure Headers'], icon: ['lock', 'shield'] },
+            MonitoringandMaintenance: { nodes: ['Datadog', 'Prometheus', 'CICD'], icon: ['datadog', 'prometheus', 'jenkins'] },
+            System: { nodes: ['Supabase'], icon: ['supabase'] } // New group System
+        };
+
+        const connections = [
+            { from: 'User Authentication', to: 'Token Validation' },
+            { from: 'Token Validation', to: 'Database' },
+            { from: 'PostgreSQL', to: 'Real time Subscriptions' },
+            { from: 'Real time Subscriptions', to: 'Interface' },
+            { from: 'Payment Processing', to: 'Edge Functions' },
+            { from: 'Order Status', to: 'Database' },
+            { from: 'Stripe Connect', to: 'Shipengine' },
+            { from: 'Shipengine', to: 'Database' },
+            { from: 'Personalized Recommendations', to: 'AI and Machine Learning' },
+            { from: 'Fraud Detection', to: 'AI and Machine Learning' },
+            { from: 'Data Sanitization', to: 'Security' },
+            { from: 'Webhook Handling', to: 'Dynamic Content' },
+            { from: 'Vercel CDN', to: 'Hosting' },
+            { from: 'Static Content', to: 'Interface' },
+            { from: 'Dynamic Content', to: 'Interface' },
+            { from: 'Websockets', to: 'State Management' },
+            { from: 'HTTPS', to: 'Secure Headers' }
+        ];
+
+        // Additional connections and forks based on relationships
+        connections.push(
+            { from: 'Order Status', to: 'Edge Functions' },
+            { from: 'Payment Processing', to: 'Security' },
+            { from: 'Stripe Connect', to: 'Security' },
+            { from: 'Shipengine', to: 'Security' },
+            { from: 'Data Sanitization', to: 'Edge Functions' },
+            { from: 'Webhook Handling', to: 'Edge Functions' },
+            { from: 'Vercel CDN', to: 'System' },
+            { from: 'Static Content', to: 'System' },
+            { from: 'Dynamic Content', to: 'System' }
+        );
+
+        function updateGroupStyles(groups) {
+            Object.keys(groups).forEach(group => {
+                groups[group].color.background = getRandomColor(); // Dynamic color update
+                groups[group].borderWidth = Math.floor(Math.random() * 5) + 1; // Dynamic border width update
+            });
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+    </script>
+    <script type="module">
+        import { DataSet, DataView, Network } from './vis-network.min.js';
+
+        class Node {
+            constructor({id, label, group, icon, level, url}) {
+                this.id = id;
+                this.label = label;
+                this.abbreviatedLabel = label.split(' ').map(word => word[0]).join('');
+                this.displayLabel = this.abbreviatedLabel;
+                this.group = group;
+                this.icon = icon;
+                this.level = level;
+                this.url = url;
+                this.value = 1;
+                this.fixed = { x: level === 1, y: level === 1 };
+            }
+        }
+
+        class Edge {
+            constructor({from, to, label, dashes}) {
+                this.from = from;
+                this.to = to;
+                this.label = label;
+                this.dashes = dashes;
+            }
+        }
+
+        class NetworkVisualization {
+            constructor(containerId, nodes, edges, options) {
+                // Initialization code
+            }
+
+            updateVisualization(level) {
+                // Update visualization based on the level
+            }
+
+            startAnimationLoop() {
+                // Start animation loop for dynamic updates
+            }
+
+            updateNodeSize() {
+                // Dynamically update node sizes
+            }
+        }
+
+        const options = {
+            autoResize: true,
+            height: '100%',
+            width: '100%',
+            locale: 'en',
+            clickToUse: false,
+            layout: {
+                hierarchical: {
+                    enabled: true,
+                    levelSeparation: 150,
+                    nodeSpacing: 100,
+                    treeSpacing: 200,
+                    blockShifting: true,
+                    edgeMinimization: true,
+                    parentCentralization: true,
+                    direction: 'UD',
+                    sortMethod: 'directed'
+                }
+            },
+            nodes: {
+                shape: 'dot',
+                font: {
+                    size: 14,
+                    color: '#333'
+                },
+                borderWidth: 2,
+                shadow: true
+            },
+            edges: {
+                width: 2,
+                color: {
+                    inherit: 'from',
+                    opacity:1.0
+                },
+                arrows: {
+                    to: { enabled: true, scaleFactor: 1, type: 'arrow' }
+                }
+            },
+            physics: {
+                enabled: true,
+                stabilization: { iterations: 250 }
+            },
+            interaction: {},
+            groups: groups
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateGroupStyles(groups); // Dynamically update group styles before visualization
+            const networkVisualization = new NetworkVisualization('networkVisualization', nodes, edges, options);
+            let level = 1;
+
+            const updateLevel = () => {
+                level > 5 ? networkVisualization.startAnimationLoop() : networkVisualization.updateVisualization(level++);
+            };
+
+            networkVisualization.updateNodeSize();
+
+            const updateButton = document.getElementById('updateButton');
+            updateButton?.addEventListener('click', updateLevel);
+        });
+    </script>
+</head>
+<body>
+    <div id="networkVisualization"></div>
+</body>
+</html>
+

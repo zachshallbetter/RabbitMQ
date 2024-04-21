@@ -1,24 +1,27 @@
 # Use an updated official Node runtime as a parent image
-FROM node:latest
+FROM node:16-alpine
 
 # Set the working directory in the container
-WORKDIR /
+WORKDIR /app
 
 # Copy package.json and package-lock.json to workdir
 COPY package*.json ./
 
-# Install any dependencies including devDependencies for nodemon
-RUN npm install --include=dev
+# Install dependencies, excluding devDependencies for production
+RUN npm install --only=production
 
 # Copy the rest of your application's code
 COPY . .
 
-# Make port 5672 (RabbitMQ) and 15672 (RabbitMQ management) available to the world outside this container
-EXPOSE 5672 15672
+# Expose port for the application
+EXPOSE 8000
 
-# Define environment variable for RabbitMQ default user and pass
+# Set environment variables for RabbitMQ default credentials
 ENV RABBITMQ_DEFAULT_USER=guest
 ENV RABBITMQ_DEFAULT_PASS=guest
+ENV RABBITMQ_DEFAULT_VHOST=/
+ENV RABBITMQ_HOST_PATH=amqp://guest:guest@rabbitmq:5672/
 
-# Run your application using nodemon when the container launches
-CMD ["npm", "run", "dev"]
+# Command to run the application
+CMD ["npm", "start"]
+

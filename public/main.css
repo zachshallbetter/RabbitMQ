@@ -1,0 +1,21 @@
+@charset "UTF-8";
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://unpkg.com/vis-network@9.1.9/styles/vis-network.min.css');
+
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+#networkVisualization, .vis-network canvas {
+  min-width: 100vw;
+  min-height: 100vh;
+}
+
+#addNode {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 20;
+}
+

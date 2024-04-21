@@ -1,0 +1,112 @@
+<div id="rabbitmq-info">
+  <h2>RabbitMQ Live Data</h2>
+  <div id="queues">
+    <h3>Queues</h3>
+    <table id="queues-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Messages</th>
+          <th>Consumers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Queue data will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+  <div id="exchanges">
+    <h3>Exchanges</h3>
+    <table id="exchanges-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Durable</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Exchange data will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+  <div id="bindings">
+    <h3>Bindings</h3>
+    <table id="bindings-table">
+      <thead>
+        <tr>
+          <th>Source</th>
+          <th>Destination</th>
+          <th>Routing Key</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Bindings data will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+  <div id="users">
+    <h3>Users</h3>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Tags</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- User data will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+</div>
+<script type="module">
+  import { DataSet, DataView } from './vis-data.min.js';
+
+  async function fetchData() {
+    console.log('Fetching data from API...');
+    const responses = await Promise.all([
+      fetch('/api/queues', { method: 'GET' }),
+      fetch('/api/exchanges', { method: 'GET' }),
+      fetch('/api/bindings', { method: 'GET' }),
+      fetch('/api/users', { method: 'GET' })
+    ]).catch(error => console.error('Failed to fetch data:', error));
+
+    const [queues, exchanges, bindings, users] = await Promise.all(
+      responses.map(response => response.ok ? response.json() : Promise.reject(new Error('Failed to load data')))
+    ).catch(error => console.error('Error parsing JSON:', error));
+
+    const dataSets = {
+      queues: new DataSet(queues),
+      exchanges: new DataSet(exchanges),
+      bindings: new DataSet(bindings),
+      users: new DataSet(users)
+    };
+
+    const dataViews = {
+      queues: new DataView(dataSets.queues),
+      exchanges: new DataView(dataSets.exchanges),
+      bindings: new DataView(dataSets.bindings),
+      users: new DataView(dataSets.users)
+    };
+
+    Object.entries(dataViews).forEach(([key, view]) => {
+      const tableId = `${key}-table`;
+      const fields = {
+        queues: ['name', 'messages', 'consumers'],
+        exchanges: ['name', 'type', 'durable'],
+        bindings: ['source', 'destination', 'routingKey'],
+        users: ['username', 'tags']
+      };
+
+      document.getElementById(tableId).innerHTML = view.map(item => `
+        <tr>
+          ${fields[key].map(field => `<td>${item[field]}</td>`).join('')}
+        </tr>
+      `).join('');
+
+      console.log(`Updated ${key} table with new data.`);
+      view.refresh(); // Refresh data views to ensure the UI is updated with the latest data
+    });
+  }
+</script>

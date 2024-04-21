@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./main.css" type="text/css">
+    <script type="module">
+        import { DataSet, DataView, Network } from './vis-network.min.js';
+        
+        class Node {
+            constructor(id, label, group) {
+                this.id = id;
+                this.label = label;
+                this.group = group;
+            }
+        }
+        
+        class Edge {
+            constructor(from, to) {
+                this.from = from;
+                this.to = to;
+            }
+        }
+        
+        class NetworkVisualization {
+            constructor(container, nodes, edges, options) {
+                this.container = document.getElementById(container);
+                this.nodes = new DataSet(nodes.map(node => new Node(node.id, node.label, node.group)));
+                this.edges = new DataSet(edges.map(edge => new Edge(edge.from, edge.to)));
+                this.data = { nodes: this.nodes, edges: this.edges };
+                this.options = options;
+                this.network = typeof Network !== 'undefined' ? new Network(this.container, this.data, this.options) : console.error('vis-network.min.js is not loaded. Please check the path to the file.');
+            }
+            
+            addNode() {
+                
+                const newId = this.nodes.length;
+                const newGroup = Math.floor(Math.random() * 10);
+                
+                this.nodes.add(new Node(newId, newId.toString(), newGroup));
+            }
+        }
+
+        const nodes = [
+            { id: 'UserAuthentication', label: 'User Authentication', group: 'Authentication', icon: 'aws-cognito' },
+            { id: 'TokenValidation', label: 'Token Validation', group: 'Authentication', icon: 'aws-lambda' },
+            { id: 'PostgreSQL', label: 'PostgreSQL', group: 'Database', icon: 'aws-rds' },
+            { id: 'RealTimeSubscriptions', label: 'Real time Subscriptions', group: 'Database', icon: 'aws-dynamodb' },
+            { id: 'PaymentProcessing', label: 'Payment Processing', group: 'ServerlessFunctions', icon: 'aws-lambda' },
+            { id: 'OrderStatus', label: 'Order Status', group: 'ServerlessFunctions', icon: 'aws-lambda' },
+            { id: 'PersonalizedRecommendations', label: 'Personalized Recommendations', group: 'AIandMachineLearning', icon: 'aws-sagemaker' },
+            { id: 'FraudDetection', label: 'Fraud Detection', group: 'AIandMachineLearning', icon: 'aws-sagemaker' },
+            { id: 'StripeConnect', label: 'Stripe Connect', group: 'EdgeFunctions', icon: 'stripe' },
+            { id: 'Shipengine', label: 'Shipengine', group: 'EdgeFunctions', icon: 'shipengine' },
+            { id: 'DataSanitization', label: 'Data Sanitization', group: 'EdgeFunctions', icon: 'aws-lambda' },
+            { id: 'WebhookHandling', label: 'Webhook Handling', group: 'EdgeFunctions', icon: 'aws-lambda' },
+            { id: 'VercelCDN', label: 'Vercel CDN', group: 'Hosting', icon: 'globe' },
+            { id: 'StaticContent', label: 'Static Content', group: 'Hosting', icon: 'aws-s3' },
+            { id: 'DynamicContent', label: 'Dynamic Content', group: 'Hosting', icon: 'aws-lambda' },
+            { id: 'Nextjs', label: 'Next js', group: 'Interface', icon: 'nextdotjs' },
+            { id: 'Websockets', label: 'Websockets', group: 'Interface', icon: 'websocket' },
+            { id: 'StateManagement', label: 'State Management', group: 'Interface', icon: 'react' },
+            { id: 'HTTPS', label: 'HTTPS', group: 'Security', icon: 'lock' },
+            { id: 'SecureHeaders', label: 'Secure Headers', group: 'Security', icon: 'shield' },
+            { id: 'Datadog', label: 'Datadog', group: 'MonitoringandMaintenance', icon: 'datadog' },
+            { id: 'Prometheus', label: 'Prometheus', group: 'MonitoringandMaintenance', icon: 'prometheus' },
+            { id: 'CICD', label: 'CICD', group: 'MonitoringandMaintenance', icon: 'jenkins' }
+        ];
+
+        const edges = [
+            { from: 'UserAuthentication', to: 'TokenValidation' },
+            { from: 'TokenValidation', to: 'Database' },
+            { from: 'PostgreSQL', to: 'RealTimeSubscriptions' },
+            { from: 'RealTimeSubscriptions', to: 'Interface' },
+            { from: 'PaymentProcessing', to: 'EdgeFunctions' },
+            { from: 'OrderStatus', to: 'Database' },
+            { from: 'StripeConnect', to: 'Shipengine' },
+            { from: 'Shipengine', to: 'Database' },
+            { from: 'PersonalizedRecommendations', to: 'AIandMachineLearning' },
+            { from: 'FraudDetection', to: 'AIandMachineLearning' },
+            { from: 'DataSanitization', to: 'Security' },
+            { from: 'WebhookHandling', to: 'DynamicContent' },
+            { from: 'VercelCDN', to: 'Hosting' },
+            { from: 'StaticContent', to: 'Interface' },
+            { from: 'DynamicContent', to: 'Interface' },
+            { from: 'Websockets', to: 'StateManagement' },
+            { from: 'HTTPS', to: 'SecureHeaders' }
+        ];
+
+        const container = document.getElementById("networkVisualization");
+
+        const data = {
+            nodes: nodes,
+            edges: edges,
+        };
+        
+        const options = {
+            autoResize: true,
+            height: '100%',
+            width: '100%',
+            locale: 'en', 
+            edges: {
+                arrows: {
+                    to: { enabled: true, scaleFactor: 1, type: 'arrow' }
+                }, 
+            },
+            nodes: {
+                shape: 'dot',
+                size: 30,
+                font: {
+                    size: 16
+                },
+                borderWidth: 1,
+            },
+
+            physics: {
+                enabled: true,
+                forceAtlas2Based: {
+                    gravitationalConstant: -40,
+                    centralGravity: 0.005,
+                    springLength: 230,
+                    springConstant: 0.3
+                },
+                solver: 'forceAtlas2Based',
+                timestep: 0.3,
+                stabilization: { iterations: 150 }
+            },
+            interaction: { 
+                hover: true
+            }
+        };
+        let network;
+        if (typeof Network !== 'undefined') {
+            network = new Network(container, { nodes: nodes, edges: edges }, options);
+        } else {
+            console.error('vis-network.min.js is not loaded. Please check the path to the file.');
+        }
+        
+        if (nodes instanceof DataSet) {
+            nodes.on('add', function() {
+                network.setData(data);
+            });
+        }
+        function addNode() {
+            const newId = nodes.length;
+            const newGroup = Math.floor(Math.random() * 10);
+            nodes.add({ id: newId, label: newId.toString(), group: newGroup });
+        }
+    </script>
+</head>
+<body>
+    <div id="networkVisualization"></div>
+    <button onclick="addNode()" id="addNode"">Add Node</button>
+</body>
+</html>
+

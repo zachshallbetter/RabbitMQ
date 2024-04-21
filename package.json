@@ -1,11 +1,24 @@
 {
+  "type": "module",
   "dependencies": {
-    "amqplib": "^0.10.4"
+    "amqplib": "^0.10.4",
+    "dotenv": "^16.0.0",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "vis-network": "^9.1.9",
+    "winston": "^3.13.0",
+    "yargs": "^17.7.2"
   },
   "devDependencies": {
+    "http-server": "^0.13.0",
     "nodemon": "^2.0.15"
   },
   "scripts": {
-    "dev": "nodemon ./*"
+    "dev": "nodemon --watch server.js",
+    "start": "node server.js",
+    "visualize": "node public/visualiser.js && open http://localhost:8801",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "worker": "node worker.js",
+    "new-task": "node new_task.js"
   }
 }

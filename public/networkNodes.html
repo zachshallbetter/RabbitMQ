@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Flow Visualizer</title>
+    <link rel="stylesheet" href="./main.css" type="text/css">
+    <script type="module">
+        import { DataSet, Network } from './vis-network.min.js';
+
+        const defaultNodes = new DataSet([
+            { id: 1, label: 'Node 1' },
+            { id: 2, label: 'Node 2' },
+            { id: 3, label: 'Node 3' }
+        ]);
+
+        const defaultEdges = new DataSet([
+            { from: 1, to: 2 },
+            { from: 2, to: 3 },
+            { from: 3, to: 1 }
+        ]);
+        
+        class MessageVisualizer {
+            constructor() {
+                this.container = document.getElementById('networkVisualization');
+                this.nodes = defaultNodes
+                this.edges = defaultEdges
+                this.options = {
+                    autoResize: true,
+                    height: '100%',
+                    width: '100%',
+                    locale: 'en',
+                    edges: {
+                        arrows: {
+                            to: { enabled: true, scaleFactor: 1, type: 'arrow' }
+                        }
+                    },
+                    nodes: {
+                        shape: 'dot',
+                        size: 30,
+                        font: {
+                            size: 32
+                        },
+                        borderWidth: 2
+                    },
+                    physics: {
+                        enabled: true,
+                        forceAtlas2Based: {
+                            gravitationalConstant: -26,
+                            centralGravity: 0.005,
+                            springLength: 230,
+                            springConstant: 0.18
+                        },
+                        solver: 'forceAtlas2Based',
+                        timestep: 0.35,
+                        stabilization: { iterations: 150 }
+                    }
+                };
+                this.network = new Network(this.container, { nodes: this.nodes, edges: this.edges }, this.options);
+                this.initEventSource();
+            }
+
+            initEventSource() {
+                const eventSource = new EventSource('/events');
+
+                eventSource.onmessage = (event) => {
+                    const messageData = JSON.parse(event.data);
+                    console.log("Received message flow data:", messageData);
+                    // Visualizing publishers, consumers, and messages based on the received data
+                    if (messageData.type === 'publisher' || messageData.type === 'consumer') {
+                        // Adding nodes for publishers and consumers
+                        this.nodes.add({
+                            id: messageData.id,
+                            label: messageData.name,
+                            shape: 'dot',
+                            color: messageData.type === 'publisher' ? 'green' : 'red'
+                        });
+                    } else if (messageData.type === 'message') {
+                        // Adding edges for messages
+                        this.edges.add({
+                            id: messageData.id,
+                            from: messageData.publisherId,
+                            to: messageData.consumerId,
+                            label: messageData.name,
+                            color: 'blue'
+                        });
+                    }
+                    // Log some of the data
+                    console.log("Logged data:", messageData);
+                };
+            }
+        }
+
+        const messageVisualizer = new MessageVisualizer();
+    </script>
+</head>
+<body>
+    <div id="networkVisualization" class="networkVisualiser"></div>
+</body>
+</html>

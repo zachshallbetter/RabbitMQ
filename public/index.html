@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Flow Visualizer</title>
+    <link rel="stylesheet" href="./main.css" type="text/css">
+    <script type="module">
+        import { DataSet, Network } from './vis-network.min.js';
+        const defaultNodes = new DataSet([
+            { id: 1, label: 'Initial Node', shape: 'dot' },
+            { id: 2, label: 'Node 2', shape: 'dot' },
+            { id: 3, label: 'Node 3', shape: 'dot' },
+            { id: 4, label: 'Node 4', shape: 'dot' },
+            { id: 5, label: 'Node 5', shape: 'dot' }
+        ]);
+        
+        const defaultEdges = new DataSet([
+            { from: 1, to: 2, label: 'Edge 1', color: 'blue' },
+            { from: 4, to: 3, label: 'Edge 2', color: 'red' },
+            { from: 3, to: 5, label: 'Edge 3', color: 'blue' },
+            { from: 1, to: 5 },
+            { from: 2, to: 3, label: 'Edge 4', color: 'green' },
+            { from: 2, to: 4, label: 'Edge 5', color: 'yellow' },
+            { from: 3, to: 4, label: 'Edge 6', color: 'purple' },
+            { from: 4, to: 5, label: 'Edge 7', color: 'orange' }
+        ]);
+        
+        class MessageVisualizer {
+            constructor() {
+                console.log("Initializing MessageVisualizer...");
+                console.log("Initializing MessageVisualizer...");
+                this.container = document.getElementById('networkVisualization');
+                console.log("Container element found.");
+                this.nodes = defaultNodes;
+                console.log("Initial node dataset created.");
+                this.edges = defaultEdges;
+                console.log("Default edge dataset created.");
+                this.options = {
+                    autoResize: true,
+                    height: '100%',
+                    width: '100%',
+                    locale: 'en', 
+                    edges: {
+                        arrows: {
+                            to: { enabled: true, scaleFactor: 1, type: 'arrow' }
+                        }, 
+                    },
+                    nodes: {
+                        shape: 'dot',
+                        size: 30,
+                        font: {
+                            size: 16
+                        },
+                        borderWidth: 1,
+                    },
+                    physics: {
+                        enabled: true,
+                        forceAtlas2Based: {
+                            gravitationalConstant: -30,
+                            centralGravity: 0.004,
+                            springLength: 280,
+                            springConstant: 0.1
+                        },
+                        solver: 'forceAtlas2Based',
+                        timestep: 0.35,
+                        stabilization: { iterations: 150 }
+                    },
+                    interaction: { hover: true }
+                };
+                console.log("Options for network visualization set.");
+                this.network = new Network(this.container, { nodes: this.nodes, edges: this.edges }, this.options);
+                console.log("Network visualization initialized.");
+                this.initEventSource();
+            }
+            initEventSource() {
+                console.log("Initializing EventSource...");
+                const eventSource = new EventSource('/events', { withCredentials: false, headers: { 'Content-Type': 'text/event-stream' } });
+
+                eventSource.addEventListener('open', () => {
+                    console.log("EventSource connection opened.");
+                });
+
+                eventSource.addEventListener('message', (event) => {
+                    const messageData = JSON.parse(event.data);
+                    console.log("Received message flow data:", messageData);
+                    // Visualizing publishers, consumers, and messages based on the received data
+                    if (messageData.type === 'publisher' || messageData.type === 'consumer') {
+                        // Adding nodes for publishers and consumers
+                        this.nodes.add({
+                            id: messageData.id,
+                            label: messageData.name,
+                            shape: 'dot',
+                            color: messageData.type === 'publisher' ? 'green' : 'red'
+                        });
+                    } else if (messageData.type === 'message') {
+                        // Adding edges for messages
+                        this.edges.add({
+                            id: messageData.id,
+                            from: messageData.publisherId,
+                            to: messageData.consumerId,
+                            label: messageData.name,
+                            color: messageData.color || 'blue'
+                        });
+                    }
+                    // Log some of the data
+                    console.log("Logged data:", messageData);
+                    // Update the network visualization
+                    this.network.setData({ nodes: this.nodes, edges: this.edges });
+                });
+
+                eventSource.addEventListener('error', (error) => {
+                    console.error("EventSource error:", error);
+                    console.log("Event properties:", Object.getOwnPropertyNames(error));
+                });
+            }
+        }
+
+        const messageVisualizer = new MessageVisualizer();
+    </script>
+</head>
+<body>
+    <div id="networkVisualization" class="networkVisualiser"></div>
+</body>
+</html>
+
+

@@ -1,26 +1,17 @@
-version: '3.8'
 services:
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    volumes:
-      - ./init.sh:/init.sh
-    entrypoint: ["/bin/sh", "-c"]
-    command:
-      - |
-        chmod +x /init.sh &&
-        /init.sh &&
-        docker-entrypoint.sh rabbitmq-server
+      - "5672:5672"  # Port for AMQP protocol
+      - "15672:15672"  # Port for management UI
     environment:
-      RABBITMQ_DEFAULT_USER: 'guest'
-      RABBITMQ_DEFAULT_PASS: 'guest'
-  app:
-    build: .
-    volumes:
-      - .:/app
-    command: nodemon ./*
-    depends_on:
-      - rabbitmq
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+    networks:
+      - rabbitmq_network
+
+networks:
+  rabbitmq_network:
+    driver: bridge
